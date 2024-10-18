@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Counter from "./component/Counter";
 import ClassCounter from "./component/ClassCounter";
 import './styles/app.css';
 import PostItem from "./component/PostItem";
 import PostList from "./component/PostList";
+import MyButton from "./component/UI/button/MyButton";
+import MyInput from "./component/UI/input/MyInput";
 
 
 
@@ -21,13 +23,30 @@ function App() {
     {id:3, title:"Python 3 ", body:"Description"},
   ])
 
+  const [title, setTitle] = useState("")
+  const bodyInputRef = useRef();
+
+  const addNewPost = (e) =>
+  {
+    e.preventDefault()
+    console.log(title);
+    console.log(bodyInputRef.current.value)
+
+  }
 
   return (
     <div className="App">
       <form>
-        <input type="text" placeholder="Название поста"/>
-        <input type="text" placeholder="Описание поста"/>
-        <button>Создать пост</button>
+        <MyInput 
+         onChange={e=>setTitle(e.target.value)}
+         value={title}
+         type="text" 
+         placeholder="Название поста"/>
+        <MyInput 
+         ref={bodyInputRef}
+         type="text" 
+         placeholder="Описание поста"/>
+        <MyButton onClick={addNewPost}>Создать пост</MyButton>
       </form>
       <PostList posts={posts} title={"Посты про JS"}/>
 
