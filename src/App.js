@@ -1,62 +1,55 @@
-import React, { useRef, useState } from "react";
-import Counter from "./component/Counter";
-import ClassCounter from "./component/ClassCounter";
+import React, { useMemo, useState } from "react";
 import './styles/app.css';
-import PostItem from "./component/PostItem";
 import PostList from "./component/PostList";
-import MyButton from "./component/UI/button/MyButton";
-import MyInput from "./component/UI/input/MyInput";
+import PostForm from "./component/PostForm";
+import PostFilter from "./component/PostFilter";
 
 
 
 function App() {
 
   const [posts, setPosts] = useState([
-    {id:1, title:"Javascript", body:"Description"},
-    {id:2, title:"Javascript 2", body:"Description"},
-    {id:3, title:"Javascript 3 ", body:"Description"},
+    {id:1, title:"ббб", body:"ааа"},
+    {id:2, title:"ааа", body:"ббб"},
+    {id:3, title:"ввв", body:"ввв "},
   ])
+  const [filter, setFilter] = useState({sort:'', query: ''})
 
-  const [posts2, setPosts2] = useState([
-    {id:1, title:"Python", body:"Description"},
-    {id:2, title:"Python 2", body:"Description"},
-    {id:3, title:"Python 3 ", body:"Description"},
-  ])
 
-  const [title, setTitle] = useState("")
-  const [body, setBody] = useState("")
-
-  const addNewPost = (e) =>
-  {
-    e.preventDefault()
-    const newPost ={
-      id: Date.now(),
-      title,
-      body
+  const sortedPosts = useMemo(() =>{
+    if(filter.sort){
+      return [...posts].sort((a,b)=>a[filter.sort].localeCompare(b[filter.sort]))
     }
+    return posts;
+  }, [filter.sort, posts])
+
+  const sortedAndSearchedPosts = useMemo(()=>{
+    return sortedPosts.filter(post => post.title.toLocaleLowerCase().includes(filter.query))
+
+  }, [filter.query, sortedPosts])
+
+  const createPost = (newPost) =>
+  {
     setPosts([...posts, newPost])
-    setTitle('')
-    setBody('')
+  }
+
+  const removePost = (post) =>{
+    setPosts(posts.filter(p => p.id !== post.id))
   }
 
   return (
     <div className="App">
-      <form>
-        <MyInput 
-         onChange={e=>setTitle(e.target.value)}
-         value={title}
-         type="text" 
-         placeholder="Название поста"/>
-
-        <MyInput 
-         onChange={e=>setBody(e.target.value)}
-         value={body}
-         type="text" 
-         placeholder="Описание поста"/>
-        <MyButton onClick={addNewPost}>Создать пост</MyButton>
-      </form>
-      <PostList posts={posts} title={"Посты про JS"}/>
-
+      <PostForm create={createPost}/>
+      <hr style={{margin: '15px 0'}}/>
+      <PostFilter 
+       filter={filter}
+       setFilter={setFilter}
+      />
+      {sortedAndSearchedPosts.length
+       ?<PostList remove={removePost} posts={sortedAndSearchedPosts} title={"Посты про JS"}/>
+       : <div style={{textAlign: 'center'}}>Посты не были найдены</div>
+      } 
+      
     </div>
   );
 }
