@@ -1,57 +1,32 @@
-import React, { useMemo, useState } from "react";
-import './styles/app.css';
-import PostList from "./component/PostList";
-import PostForm from "./component/PostForm";
-import PostFilter from "./component/PostFilter";
-import MyModal from "./component/UI/MyModal/MyModal";
-import MyButton from "./component/UI/button/MyButton";
-
-
+import { BrowserRouter} from 'react-router-dom';
+import './styles/App.css';
+import Navbar from './component/UI/navbar/Navbar';
+import AppRouter from './component/AppRouter';
+import { AuthContext } from './context';
+import { useEffect, useState } from 'react';
 
 function App() {
+  const [isAuth, setIsAuth] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [posts, setPosts] = useState([
-    {id:1, title:"ббб", body:"ааа"},
-    {id:2, title:"ааа", body:"ббб"},
-    {id:3, title:"ввв", body:"ввв "},
-  ])
-  const [filter, setFilter] = useState({sort:'', query: ''})
-  const [modal, setModal] = useState(false);
-
-
-  const sortedPosts = useMemo(() =>{
-    if(filter.sort){
-      return [...posts].sort((a,b)=>a[filter.sort].localeCompare(b[filter.sort]))
+  useEffect(() =>{
+    if(localStorage.getItem('auth')){
+      setIsAuth(true)
     }
-    return posts;
-  }, [filter.sort, posts])
-
-  const sortedAndSearchedPosts = useMemo(()=>{
-    return sortedPosts.filter(post => post.title.toLocaleLowerCase().includes(filter.query))
-
-  }, [filter.query, sortedPosts])
-
-  const createPost = (newPost) =>
-  {
-    setPosts([...posts, newPost])
-    setModal(false)
-  }
-
-  const removePost = (post) =>{
-    setPosts(posts.filter(p => p.id !== post.id))
-  }
+    setIsLoading(false)
+  }, [])
 
   return (
-    <div className="App">
-      <MyButton style={{marginTop:'30px'}} onClick={() => setModal(true)}>Создать пост</MyButton>
-      <MyModal visible={modal} setVisible={setModal}><PostForm create={createPost}/></MyModal>
-      <hr style={{margin: '15px 0'}}/>
-      <PostFilter 
-       filter={filter}
-       setFilter={setFilter}
-      />
-       <PostList remove={removePost} posts={sortedAndSearchedPosts} title={"Посты про JS"}/> 
-    </div>
+    <AuthContext.Provider value={{
+      isAuth,
+      setIsAuth,
+      isLoading
+    }}>
+      <BrowserRouter>
+        <Navbar />
+        <AppRouter/>
+      </BrowserRouter>
+    </AuthContext.Provider>
   );
 }
 
